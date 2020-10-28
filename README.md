@@ -1,2 +1,2 @@
 # HSR_RRT
-Both urdf uses absolute path. be sure to change it before using.
+Both urdfs use absolute path. be sure to change it before using.
