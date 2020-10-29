@@ -1,0 +1,38 @@
+# -*- python -*-
+# This file contains rules for Bazel; see drake/doc/bazel.rst.
+
+load(
+    "@drake//tools/skylark:drake_cc.bzl",
+    "drake_cc_binary",
+)
+load("//tools/lint:lint.bzl", "add_lint_tests")
+load("@drake//tools/install:install.bzl", "install")
+load("@drake//tools/install:install_data.bzl", "install_data")
+
+package(
+    default_visibility = [":__subpackages__"],
+)
+
+drake_cc_binary(
+    name = "hsr",
+    srcs = ["hsr.cc"],
+    add_test_rule = 1,
+    data = ["//examples/hsr:models"],
+    test_rule_args = [
+        "--simulation_time=0.1",
+    ],
+    deps = [
+        "//common:find_resource",
+        "//geometry:geometry_visualization",
+        "//multibody/parsing",
+        "//multibody/plant",
+        "//multibody/tree",
+        "//systems/analysis:simulator",
+        "//systems/analysis:simulator_gflags",
+        "//systems/analysis:simulator_print_stats",
+        "//systems/framework:diagram",
+        "@gflags",
+    ],
+)
+
+add_lint_tests()
