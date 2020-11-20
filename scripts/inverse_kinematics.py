@@ -3,6 +3,7 @@ import sys
 from pydrake.common import FindResourceOrThrow
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
+from pydrake.multibody.tree import ModelInstanceIndex
 from pydrake.systems.analysis import Simulator
 from pydrake.systems.framework import DiagramBuilder, BasicVector
 from pydrake.systems.meshcat_visualizer import ConnectMeshcatVisualizer
@@ -45,22 +46,33 @@ plant_context = plant.GetMyMutableContextFromRoot(context)
 plant.get_actuation_input_port().FixValue(plant_context, np.zeros(13))
 
 gripper = plant.GetBodyByName('hand_palm_link')
-# gripper_joint = plant.GetJointByName('hand_palm_joint')
+gripper_joint = plant.GetJointByName('hand_palm_joint')
+
+model_index = ModelInstanceIndex(2)
+print(model_index.is_valid())
+print(plant.GetModelInstanceName(model_index))
+# hsrb_model = plant.GetModelInstanceByName(plant.GetModelInstanceName(model_index))
+hsr_joint_indices = plant.GetJointIndices(model_index)
+# print(hsr_joint_indices)
+
+print(plant.get_joint(hsr_joint_indices[26]))
+
 pose = plant.EvalBodyPoseInWorld(plant_context, gripper)
 print(pose.translation())
 print(pose.rotation().matrix())
 pt = [pose.translation()[0]+0.01,pose.translation()[1]+0.01,pose.translation()[2]+0.01]
+
 gripper_end_effect_position = pt
 gripper_end_effect_rotation = pose.rotation()
 gripper_end_effect_pose = Isometry3(gripper_end_effect_rotation.matrix(),gripper_end_effect_position)
 
 IK = DifferentialInverseKinematicsIntegrator(plant, gripper.body_frame(), 0.1, DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))), plant_context, True)
 print(plant.GetPositions(plant_context))
-IK.SetPositions(plant_context,plant.GetPositions(plant_context))
-# pose_1 = IK.ForwardKinematics(plant_context) 
-# joint_v = DoDifferentialInverseKinematics(plant, plant_context,gripper_end_effect_pose, gripper.body_frame(),DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))))
-# print(joint_v.status)
-# print(joint_v.joint_velocities)
+# IK.SetPositions(plant_context,plant.GetPositions(plant_context))
+pose_1 = IK.ForwardKinematics(plant_context)
+joint_v = DoDifferentialInverseKinematics(plant, plant_context,gripper_end_effect_pose, gripper.body_frame(),DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))))
+print(joint_v.status)
+print(joint_v.joint_velocities)
 # # # advance sims
 
 # simulator = Simulator(diagram, context)

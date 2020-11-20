@@ -4,6 +4,7 @@ import rospy
 import trajectory_msgs.msg
 import geometry_msgs.msg
 import hsrb_interface, rospkg, numpy, yaml, sys
+from sensor_msgs.msg import JointState
 from gazebo_msgs.srv import *
 
 #some init stuff
@@ -46,16 +47,23 @@ while running is False:
             running = True
 
 #init trajectories
-traj = trajectory_msgs.msg.JointTrajectory()
-traj.joint_names = ["arm_lift_joint", "arm_flex_joint",
-                    "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
 
 #planning
-p = trajectory_msgs.msg.JointTrajectoryPoint()
-p.positions = [0.2, -0.5, 0, 0, 0]
-p.velocities = [0, 0, 0, 0, 0]
-p.time_from_start = rospy.Time(3)
-traj.points = [p]
+def joint_velocities_trajectory_cb(joint_states):
+    print('traj')
+    traj = trajectory_msgs.msg.JointTrajectory()
+    traj.joint_names = ["arm_lift_joint", "arm_flex_joint",
+                        "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
 
+    p = trajectory_msgs.msg.JointTrajectoryPoint()
+    p.positions = [joint_states.position[1],joint_states.position[0],joint_states.position[2],joint_states.position[len(joint_states.position)-2], joint_states.position[len(joint_states.position)-1]]
+    p.velocities = [0, 0.1, 0, 0.4, 0]
+    p.time_from_start = rospy.Time(0.1)
+    traj.points = [p]
+    pub.publish(traj)
+
+
+
+rospy.Subscriber("/hsrb/joint_states", JointState, joint_velocities_trajectory_cb)
+rospy.spin()
 # publish ROS message
-pub.publish(traj)

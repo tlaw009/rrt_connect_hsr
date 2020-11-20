@@ -64,6 +64,7 @@
   <exec_depend>controller_manager_msgs</exec_depend>
   <exec_depend>trajectory_msgs</exec_depend>
   <exec_depend>tmc_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
 
 
 
