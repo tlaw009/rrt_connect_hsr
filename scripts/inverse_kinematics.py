@@ -4,7 +4,7 @@ from pydrake.common import FindResourceOrThrow
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
 from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import DiagramBuilder
+from pydrake.systems.framework import DiagramBuilder, BasicVector
 from pydrake.systems.meshcat_visualizer import ConnectMeshcatVisualizer
 from pydrake.math import RollPitchYaw , RotationMatrix, RigidTransform
 from pydrake.common.eigen_geometry import Isometry3
@@ -55,8 +55,7 @@ gripper_end_effect_rotation = pose.rotation()
 gripper_end_effect_pose = Isometry3(gripper_end_effect_rotation.matrix(),gripper_end_effect_position)
 
 IK = DifferentialInverseKinematicsIntegrator(plant, gripper.body_frame(), 0.1, DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))), plant_context, True)
-print(IK.get_parameters().get_joint_position_limits())
-
+print(plant.GetPositions(plant_context))
 IK.SetPositions(plant_context,plant.GetPositions(plant_context))
 # pose_1 = IK.ForwardKinematics(plant_context) 
 # joint_v = DoDifferentialInverseKinematics(plant, plant_context,gripper_end_effect_pose, gripper.body_frame(),DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))))
