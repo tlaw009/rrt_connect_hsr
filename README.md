@@ -1,2 +1,2 @@
 # HSR_RRT
-Both urdfs use absolute path, be sure to change it before using.
+RRT implementation for manipulation with HSR utilizing kinematic solver from drake
