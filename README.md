@@ -1,6 +1,6 @@
 # RRT_connect_hsr
 RRT implementation for manipulation with HSR utilizing kinematic solver from drake
 
-Current: Solved Inverse Kinematics, proceed to write a ROS service wrapper for it
+Current: finished ik srv, proceed to testing
 
-Note: repo name changed to RRT_connect_hsr
+Log: repo name changed to RRT_connect_hsr
