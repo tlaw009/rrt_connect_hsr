@@ -16,7 +16,7 @@ import os
 import numpy as np
 import rospy
 from pathlib import Path
-from drake_ik.srv import pose, joint_positions
+from rrt_connect_hsr.srv import *
 
 rospy.init_node('drake_ik_solver')
 # init builder and load multibody
@@ -77,7 +77,7 @@ def ik_srv_handle(pose):
     if not result.is_success():
         print("IK failed")
         return np.zeros(1)
-    
+
     return result.GetSolution()
 
 
