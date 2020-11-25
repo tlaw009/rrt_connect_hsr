@@ -57,18 +57,19 @@ def quat_norm(quat):
     return {'w':nw, 'x':nx, 'y':ny, 'z':nz}
 
 # noisy end effect translation helper
-def noisy_end_effect_trans(trans):
-    trans_lower = [trans[0]-0.01*np.random.rand(), trans[1]-0.01*np.random.rand(), trans[2]-0.01*np.random.rand()]
-    trans_upper = [trans[0]+0.01*np.random.rand(), trans[1]+0.01*np.random.rand(), trans[2]+0.01*np.random.rand()]
-    return{'lower': trans_lower, 'upper': trans_upper}
+# def noisy_end_effect_trans(trans):
+#     trans_lower = [trans[0]-0.01*np.random.rand(), trans[1]-0.01*np.random.rand(), trans[2]-0.01*np.random.rand()]
+#     trans_upper = [trans[0]+0.01*np.random.rand(), trans[1]+0.01*np.random.rand(), trans[2]+0.01*np.random.rand()]
+#     return{'lower': trans_lower, 'upper': trans_upper}
 
 # service handle function
 def ik_srv_handle(pose):
     # init pos and rot
     gripper_end_effect_position = [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z]
-    noisy_gripper_end_effect_position = noisy_end_effect_trans(gripper_end_effect_position)
-    print('pose translation lower bound: ', noisy_gripper_end_effect_position['lower'])
-    print('pose translation upper bound: ', noisy_gripper_end_effect_position['upper'])
+    print('pose translation: ', gripper_end_effect_position)
+    # noisy_gripper_end_effect_position = noisy_end_effect_trans(gripper_end_effect_position)
+    # print('pose translation lower bound: ', noisy_gripper_end_effect_position['lower'])
+    # print('pose translation upper bound: ', noisy_gripper_end_effect_position['upper'])
     nquat = quat_norm(pose.pose.orientation)
     if nquat == 0:
         return np.zeros(1)
@@ -76,8 +77,9 @@ def ik_srv_handle(pose):
     gripper_end_effect_rotation = RotationMatrix(quat)
     print('pose rotation: ', RollPitchYaw(gripper_end_effect_rotation).vector())
     # init ik program with constraints
-    ik = InverseKinematics(plant,plant_context,True)
-    ik.AddPositionConstraint(gripper_frame, [0,0,0], plant.world_frame(), noisy_gripper_end_effect_position['lower'] , noisy_gripper_end_effect_position['upper'])
+    ik = InverseKinematics(plant,plant_context)
+    # ik.AddPositionConstraint(gripper_frame, [0,0,0], plant.world_frame(), noisy_gripper_end_effect_position['lower'] , noisy_gripper_end_effect_position['upper'])
+    ik.AddPositionConstraint(gripper_frame, [0,0,0], plant.world_frame(), gripper_end_effect_position , gripper_end_effect_position)
     ik.AddOrientationConstraint(gripper_frame, RotationMatrix(), plant.world_frame(), gripper_end_effect_rotation, 0.0)
     # collision constraint to be added later
     # ik.AddMinimumDistanceConstraint(0.001, 0.1)
