@@ -1,7 +1,7 @@
 # RRT_connect_hsr
 RRT implementation for manipulation with HSR utilizing kinematic solver from drake
 
-Current: change pkg name
+Current: service test passed, unable to reliably obtain solution via drake_ik
 
 Log:
 

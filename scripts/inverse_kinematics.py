@@ -16,14 +16,14 @@ import os
 import numpy as np
 import rospy
 from pathlib import Path
-from rrt_connect_hsr.srv import *
+from rrt_connect_hsr.srv import drake_ik, drake_ikResponse
 
 rospy.init_node('drake_ik_solver')
 # init builder and load multibody
 
 builder = DiagramBuilder()
 plant, _ = AddMultibodyPlantSceneGraph(builder, 1e-4)
-hsr = Parser(plant,_).AddModelFromFile(str(Path.home())+"/ros_drake_ws/src/RRT_connect_hsr/robots/hsrb4s.obj.urdf")
+hsr = Parser(plant,_).AddModelFromFile(str(Path.home())+"/ros_drake_ws/src/rrt_connect_hsr/robots/hsrb4s.obj.urdf")
 plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("base_footprint", hsr))
 plant.Finalize()
 
@@ -45,28 +45,39 @@ plant_context = plant.GetMyMutableContextFromRoot(context)
 q0 = plant.GetPositions(plant_context)
 plant.get_actuation_input_port().FixValue(plant_context, np.zeros(13))
 
-# retrieve gripper body and frame
-gripper = plant.GetBodyByName('hand_palm_link')
+# retrieve gripper frame
 gripper_frame = plant.GetFrameByName('hand_palm_link')
 
-# testing suite 1
-"""
-pose = plant.EvalBodyPoseInWorld(plant_context, gripper)
 
-print(pose.translation())
-print(pose.rotation().matrix())
-pt = [pose.translation()[0]+0.2,pose.translation()[1],pose.translation()[2]]
-"""
+# quaternion normalization
+
+def quat_norm(quat):
+    d = np.sqrt(np.square(quat.w) + np.square(quat.x) + np.square(quat.y) + np.square(quat.z))
+    if d == 0:
+        return 0
+    nw = quat.w/d
+    nx = quat.x/d
+    ny = quat.y/d
+    nz = quat.z/d
+    return {'w':nw, 'x':nx, 'y':ny, 'z':nz}
+
 # service handle function
+
 def ik_srv_handle(pose):
     #init pos and rot
     gripper_end_effect_position = [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z]
-    quat = Quaternion(pose.pose.orientation.w, pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z)
+    print('pose translation: ', gripper_end_effect_position)
+    nquat = quat_norm(pose.pose.orientation)
+    if nquat == 0:
+        return np.zeros(1)
+    quat = Quaternion(nquat['w'], nquat['x'], nquat['y'], nquat['z'])
     gripper_end_effect_rotation = RotationMatrix(quat)
+    print('pose rotation: ', RollPitchYaw(gripper_end_effect_rotation).vector())
     # init ik program with constraints
-    ik = InverseKinematics(plant,plant_context)
-    ik.AddPositionConstraint(gripper.body_frame(), [0,0,0], plant.world_frame(), gripper_end_effect_position, gripper_end_effect_position)
-    ik.AddOrientationConstraint(gripper.body_frame(), RotationMatrix(), plant.world_frame(), gripper_end_effect_rotation, 0.0)
+    ik = InverseKinematics(plant,plant_context,True)
+    ik.AddPositionConstraint(gripper_frame, [0,0,0], plant.world_frame(), gripper_end_effect_position, gripper_end_effect_position)
+    ik.AddOrientationConstraint(gripper_frame, RotationMatrix(), plant.world_frame(), gripper_end_effect_rotation, 0.0)
+    ik.AddMinimumDistanceConstraint(0.001, 0.1)
     prog = ik.get_mutable_prog()
     q = ik.q()
     prog.AddQuadraticErrorCost(np.identity(len(q)), q0, q)
@@ -77,30 +88,14 @@ def ik_srv_handle(pose):
     if not result.is_success():
         print("IK failed")
         return np.zeros(1)
-
-    return result.GetSolution()
-
-
+    print('joint positions: ', result.GetSolution())
+    return drake_ikResponse(result.GetSolution()) 
 
 
-ik_s = rospy.Service('drake_ik_service', pose, ik_srv_handle)
+
+# start service server
+
+ik_s = rospy.Service('drake_ik_service', drake_ik, ik_srv_handle)
 print('drake ik solver online')
 rospy.spin()
-
-
-
-# IK = DifferentialInverseKinematicsIntegrator(plant, gripper.body_frame(), 0.1, DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))), plant_context, True)
-# print(plant.GetPositions(plant_context))
-# # IK.SetPositions(plant_context,plant.GetPositions(plant_context))
-# pose_1 = IK.ForwardKinematics(plant_context)
-# joint_v = DoDifferentialInverseKinematics(plant, plant_context,gripper_end_effect_pose, gripper.body_frame(),DifferentialInverseKinematicsParameters(len(plant.GetPositions(plant_context)),len(plant.GetVelocities(plant_context))))
-# print(joint_v.status)
-# print(joint_v.joint_velocities)
-
-
-# advance sims
-
-# simulator = Simulator(diagram, context)
-# simulator.set_target_realtime_rate(1)
-# simulator.AdvanceTo(5.0)
 
