@@ -1,0 +1,7 @@
+float64[] joint_positions
+string[] joint_names
+---
+float64[] translation
+float64[] rotation 
+
+# rotation as quaternion in xyzw

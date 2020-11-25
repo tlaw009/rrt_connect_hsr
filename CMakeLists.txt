@@ -59,6 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   drake_ik.srv
+  drake_fk.srv
   )
 
 ## Generate actions in the 'action' folder
@@ -163,6 +164,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/inverse_kinematics.py
+  scripts/forward_kinematics.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
