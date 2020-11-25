@@ -23,7 +23,7 @@ rospy.init_node('drake_ik_solver')
 
 builder = DiagramBuilder()
 plant, _ = AddMultibodyPlantSceneGraph(builder, 1e-4)
-hsr = Parser(plant,_).AddModelFromFile(str(Path.home())+"/ros_drake_ws/src/rrt_connect_hsr/robots/hsrb4s.obj.urdf")
+hsr = Parser(plant,_).AddModelFromFile(str(Path.home())+"/ros_drake_ws/src/rrt_connect_hsr/robots/hsrb4s_arm.obj.urdf")
 plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("base_footprint", hsr))
 plant.Finalize()
 
@@ -43,11 +43,10 @@ diagram.Publish(context)
 
 plant_context = plant.GetMyMutableContextFromRoot(context)
 q0 = plant.GetPositions(plant_context)
-plant.get_actuation_input_port().FixValue(plant_context, np.zeros(13))
+# plant.get_actuation_input_port().FixValue(plant_context, np.zeros(13))
 
 # retrieve gripper frame
 gripper_frame = plant.GetFrameByName('hand_palm_link')
-
 
 # quaternion normalization
 
@@ -75,9 +74,10 @@ def ik_srv_handle(pose):
     print('pose rotation: ', RollPitchYaw(gripper_end_effect_rotation).vector())
     # init ik program with constraints
     ik = InverseKinematics(plant,plant_context,True)
-    ik.AddPositionConstraint(gripper_frame, [0,0,0], plant.world_frame(), gripper_end_effect_position, gripper_end_effect_position)
+    ik.AddPositionConstraint(gripper_frame, [0,0,0], plant.world_frame(), gripper_end_effect_position , gripper_end_effect_position)
     ik.AddOrientationConstraint(gripper_frame, RotationMatrix(), plant.world_frame(), gripper_end_effect_rotation, 0.0)
-    ik.AddMinimumDistanceConstraint(0.001, 0.1)
+    # collision constraint to be added later
+    # ik.AddMinimumDistanceConstraint(0.001, 0.1)
     prog = ik.get_mutable_prog()
     q = ik.q()
     prog.AddQuadraticErrorCost(np.identity(len(q)), q0, q)
@@ -86,7 +86,7 @@ def ik_srv_handle(pose):
     result = Solve(ik.prog())
     #check result validity
     if not result.is_success():
-        print("IK failed")
+        print("IK failed: ", result.get_solution_result())
         return np.zeros(1)
     print('joint positions: ', result.GetSolution())
     return drake_ikResponse(result.GetSolution()) 

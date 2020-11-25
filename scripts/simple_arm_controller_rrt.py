@@ -45,48 +45,43 @@ ik_pose =  post_pose.pose
 
 # testing sampled orientation
 
-ik_pose.orientation.w = 1.0
-ik_pose.orientation.x = 0.0
-ik_pose.orientation.y = 0.0
-ik_pose.orientation.z = 0.0
 ik_sol = ik_handle(ik_pose)
 if not len(ik_sol.joint_positions) == 1:
     print(ik_sol.joint_positions)
 
-# wait to establish connection between the controller
-while pub.get_num_connections() == 0:
-    rospy.sleep(0.1)
+# # wait to establish connection between the controller
+# while pub.get_num_connections() == 0:
+#     rospy.sleep(0.1)
 
-# make sure the controller is running
-rospy.wait_for_service('/hsrb/controller_manager/list_controllers')
-list_controllers = (
-    rospy.ServiceProxy('/hsrb/controller_manager/list_controllers',
-                       controller_manager_msgs.srv.ListControllers))
-running = False
-while running is False:
-    rospy.sleep(0.1)
-    for c in list_controllers().controller:
-        if c.name == 'arm_trajectory_controller' and c.state == 'running':
-            running = True
+# # make sure the controller is running
+# rospy.wait_for_service('/hsrb/controller_manager/list_controllers')
+# list_controllers = (
+#     rospy.ServiceProxy('/hsrb/controller_manager/list_controllers',
+#                        controller_manager_msgs.srv.ListControllers))
+# running = False
+# while running is False:
+#     rospy.sleep(0.1)
+#     for c in list_controllers().controller:
+#         if c.name == 'arm_trajectory_controller' and c.state == 'running':
+#             running = True
 
-#init trajectories
+# #init trajectories
 
-#planning
-def joint_velocities_trajectory_cb(joint_states):
-    # print('traj')
-    traj = trajectory_msgs.msg.JointTrajectory()
-    traj.joint_names = ["arm_lift_joint", "arm_flex_joint",
-                        "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
+# #planning
+# def joint_velocities_trajectory_cb(joint_states):
+#     # print('traj')
+#     traj = trajectory_msgs.msg.JointTrajectory()
+#     traj.joint_names = ["arm_lift_joint", "arm_flex_joint",
+#                         "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
 
-    p = trajectory_msgs.msg.JointTrajectoryPoint()
-    p.positions = [joint_states.position[1],joint_states.position[0],joint_states.position[2],joint_states.position[len(joint_states.position)-2], joint_states.position[len(joint_states.position)-1]]
-    p.velocities = [0, 0.1, 0, 0.4, 0]
-    p.time_from_start = rospy.Time(0.1)
-    traj.points = [p]
-    # pub.publish(traj)
+#     p = trajectory_msgs.msg.JointTrajectoryPoint()
+#     p.positions = [joint_states.position[1],joint_states.position[0],joint_states.position[2],joint_states.position[len(joint_states.position)-2], joint_states.position[len(joint_states.position)-1]]
+#     p.velocities = [0, 0.1, 0, 0.4, 0]
+#     p.time_from_start = rospy.Time(0.1)
+#     traj.points = [p]
+#     # pub.publish(traj)
 
 
 
-rospy.Subscriber("/hsrb/joint_states", JointState, joint_velocities_trajectory_cb)
-rospy.spin()
-# publish ROS message
+# rospy.Subscriber("/hsrb/joint_states", JointState, joint_velocities_trajectory_cb)
+# rospy.spin()

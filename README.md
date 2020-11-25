@@ -1,9 +1,9 @@
 # RRT_connect_hsr
 RRT implementation for manipulation with HSR utilizing kinematic solver from drake
 
-Current: service test passed, unable to reliably obtain solution via drake_ik
+Current: trimmed down urdf, identified ```kInfeasibleConstraints``` issue to be inherent rotational offset between base_footprint and hand_palm_link being unaccounted for when pose passed to solver
 
-Log:
+Repo log:
 
 repo name changed to RRT_connect_hsr
 
