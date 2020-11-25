@@ -3,6 +3,8 @@ RRT implementation for manipulation with HSR utilizing kinematic solver from dra
 
 Current: change pkg name
 
-Log: repo name changed to RRT_connect_hsr
+Log:
 
-	 repo name changed to rrt_connect_hsr to conform to rospkg naming convention
+repo name changed to RRT_connect_hsr
+
+repo name changed to rrt_connect_hsr to conform to rospkg naming convention
