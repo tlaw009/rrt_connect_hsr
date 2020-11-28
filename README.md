@@ -3,6 +3,8 @@ RRT implementation for manipulation with HSR utilizing kinematic solver from dra
 
 Entry_0: ditched ik: unresolved ```kInfeasibleConstraints```, fk service working and tested, drake and gazebo joint state in sync, returned pose aligned with (/hand_palm_link, /base_link) transform, proceed to program rrt sampling in joint space
 
+Entry_1: RRT greedy planner implemented and tested, rotation distance and trajectory smoothness still need to be accounted for
+
 Repo name change log:
 
 0: repo name changed to RRT_connect_hsr
