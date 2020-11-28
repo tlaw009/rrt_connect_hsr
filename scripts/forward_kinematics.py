@@ -62,6 +62,8 @@ print('retrieved gripper_body...')
 # set up joint positions and limits
 m_joint_lower = plant.GetPositionLowerLimits()
 m_joint_upper = plant.GetPositionUpperLimits()
+print('lower joint limits: ', m_joint_lower)
+print('upper joint limits: ', m_joint_upper)
 
 # service handle
 def fk_srv_handle(joint_pos_name_pair):
