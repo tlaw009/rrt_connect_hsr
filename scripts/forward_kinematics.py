@@ -11,6 +11,7 @@ from pydrake.math import RollPitchYaw , RotationMatrix, RigidTransform
 from pydrake.common.eigen_geometry import Isometry3, Quaternion
 from pydrake.multibody.inverse_kinematics import InverseKinematics
 from pydrake.solvers.mathematicalprogram import Solve
+from IPython.display import display, SVG
 import pydot
 import os
 import numpy as np
@@ -27,6 +28,7 @@ hsr = Parser(plant,_).AddModelFromFile(str(Path.home())+"/ros_drake_ws/src/rrt_c
 plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("base_footprint", hsr))
 plant.Finalize()
 print('multibody plant finalized...')
+pydot.graph_from_dot_data(plant.GetTopologyGraphvizString())[0].write_png(str(Path.home())+"/ros_drake_ws/src/rrt_connect_hsr/graphs/tf_tree.png")
 
 # connect meshcat, build diagram and draw context
 ### running local meshcat server REQUIRED ###
