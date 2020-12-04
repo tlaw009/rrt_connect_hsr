@@ -11,7 +11,6 @@ from pydrake.math import RollPitchYaw , RotationMatrix, RigidTransform
 from pydrake.common.eigen_geometry import Isometry3, Quaternion
 from pydrake.multibody.inverse_kinematics import InverseKinematics
 from pydrake.solvers.mathematicalprogram import Solve
-from IPython.display import display, SVG
 import pydot
 import os
 import numpy as np
